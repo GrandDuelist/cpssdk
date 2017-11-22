@@ -1,0 +1,8 @@
+setup.py
+cpssdk/__init__.py
+cpssdk/cpstime.py
+cpstime.egg-info/PKG-INFO
+cpstime.egg-info/SOURCES.txt
+cpstime.egg-info/dependency_links.txt
+cpstime.egg-info/requires.txt
+cpstime.egg-info/top_level.txt
