@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/app/mainwindow.py", line 3011, in main
+    mainwindow = run_spyder(app, options, args)
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/app/mainwindow.py", line 2913, in run_spyder
+    main.setup()
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/app/mainwindow.py", line 860, in setup
+    from spyder.plugins.externalconsole import ExternalConsole
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/plugins/externalconsole.py", line 39, in <module>
+    from spyder.widgets.externalshell.pythonshell import ExternalPythonShell
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/widgets/externalshell/pythonshell.py", line 34, in <module>
+    from spyder.widgets.variableexplorer.namespacebrowser import NamespaceBrowser
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/spyder/widgets/variableexplorer/namespacebrowser.py", line 26, in <module>
+    import ipykernel.pickleutil
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/ipykernel/__init__.py", line 2, in <module>
+    from .connect import *
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/ipykernel/connect.py", line 18, in <module>
+    import jupyter_client
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/jupyter_client/__init__.py", line 7, in <module>
+    from .manager import KernelManager, run_kernel
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/jupyter_client/manager.py", line 32, in <module>
+    from .session import Session
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/jupyter_client/session.py", line 55, in <module>
+    from zmq.utils import jsonapi
+  File "/Users/ogre/anaconda/lib/python2.7/site-packages/zmq/utils/jsonapi.py", line 25, in <module>
+    jsonmod = __import__(mod)
+  File "simplejson.py", line 6
+    def dumpRegions(regions,ids=None,fh):
+SyntaxError: non-default argument follows default argument

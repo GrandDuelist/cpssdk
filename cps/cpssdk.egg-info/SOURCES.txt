@@ -3,7 +3,6 @@ cpssdk/__init__.py
 cpssdk/cpsspatio-test.py
 cpssdk/cpsspatio.py
 cpssdk/cpstime.py
-cpssdk/simplejson.py
 cpssdk.egg-info/PKG-INFO
 cpssdk.egg-info/SOURCES.txt
 cpssdk.egg-info/dependency_links.txt

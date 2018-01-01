@@ -90,8 +90,8 @@ def minmaxGeoJson(geojson_path):
         minx = min(minx,x);maxx = max(maxx,x);miny=min(miny,y);maxy=max(maxy,y)
     print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))        
 
-class CSPCrop():
-    def setRectangle(self,minx,miny,maxx,maxy):
+class CPSCrop():
+    def setRectangle(self,minx,maxx,miny,maxy):
         self.minx = minx; self.miny = miny; self.maxx = maxx; self.maxy = maxy
     def isInRectangle(self,x,y):
         isx = (x >= self.minx and x <= self.maxx)
