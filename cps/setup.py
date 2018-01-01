@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "cpstime",
-    version = "0.1.1",
+    name = "cpssdk",
+    version = "0.0.1",
     keywords = ("pip", "datacanvas", "eds", "xiaoh"),
     description = "cps time processing package",
     long_description = "read time and calculate trip duration package in cyber physical system processing",
@@ -15,5 +15,5 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     platforms = "any",
-    install_requires = ['datetime']
+    install_requires = ['datetime','json']
 )

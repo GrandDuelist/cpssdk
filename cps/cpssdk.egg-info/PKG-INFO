@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: cpssdk
+Version: 0.0.1
+Summary: cps time processing package
+Home-page: http://zhihanfang.com
+Author: ogre
+Author-email: ezhihan@gmail.com
+License: MIT Licence
+Description: read time and calculate trip duration package in cyber physical system processing
+Keywords: pip,datacanvas,eds,xiaoh
+Platform: any
