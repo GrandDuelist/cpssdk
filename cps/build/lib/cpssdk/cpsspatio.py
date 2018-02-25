@@ -1,3 +1,5 @@
+from math import sin, cos, sqrt, atan2, radians
+import json
 class CPSSpatio():
     def __init__(self,grid_shape=None):
         self.grid_shape = (50,50)
@@ -8,11 +10,12 @@ class CPSSpatio():
         self.grid_regions = {}
         self.init()
 
-    def init(self,out_edge_regions):
-        self.initSpatioRegion(out_edge_regions)
-        (minx,miny,maxx,maxy) = self.getRectBoundaryFromRegions(self.regions)
-        self.initSpatioRectBoundary(minx,maxx,miny,maxy)
-        self.initRectToPolygonMapping()
+    def init(self,out_edge_regions=None):
+        if out_edge_regions:
+            self.initSpatioRegion(out_edge_regions)
+            (minx,miny,maxx,maxy) = self.getRectBoundaryFromRegions(self.regions)
+            self.initSpatioRectBoundary(minx,maxx,miny,maxy)
+            self.initRectToPolygonMapping()
 
     
     def initSpatioRegion(self,out_edge):
@@ -91,6 +94,8 @@ def minmaxGeoJson(geojson_path):
     print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))        
 
 class CPSCrop():
+    def __init__(self):
+        self.cpsspatio = CPSSpatio()
     def setRectangle(self,minx,maxx,miny,maxy):
         self.minx = minx; self.miny = miny; self.maxx = maxx; self.maxy = maxy
     def isInRectangle(self,x,y):
@@ -99,4 +104,28 @@ class CPSCrop():
         return(isx and isy)
     def setShenzhenRectangle(self):
         self.setRectangle(113.7463515,114.6237079,22.4415225,22.8644043)
+    def setPolygonBoundary(self,polygon_list):
+        self.polygon_boundary = polygon_list
+        
+    def setShenzhenPolygonBoundary(self):
+        data = json.load(open("data/boundary/shenzhen_boundary_gps.geoJson"))
+        polygon_list = data['coordinates'][0]
+        self.setPolygonBoundary(polygon_list)
+    
+    def isInPolygon(self,x,y):
+        return(self.cpsspatio.pnpoly(self.polygon_boundary,[x,y]))
+
+class CPSDistance():
+    def GPSDist(self,p1,p2):
+        R=  6373.0
+        lon1 = radians(p1[0]); lat1 = radians(p1[1])
+        lon2 = radians(p2[0]); lat2 = radians(p2[1])
+        dlon=lon2-lon1; dlat = lat2-lat1
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        distance = R * c
+        return(distance)
+        
+
+        
     
