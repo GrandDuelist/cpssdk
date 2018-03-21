@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan2, radians
 import json
+
 class CPSSpatio():
     def __init__(self,grid_shape=None):
         self.grid_shape = (50,50)
@@ -36,8 +37,10 @@ class CPSSpatio():
         
     def initSpatioRectBoundary(self,minx,maxx,miny,maxy):
         self.minmax = (minx,maxx,miny,maxy)
+        self.minx = minx; self.maxx=maxx; self.miny=miny; self.maxy = maxy
         (xshape,yshape) = self.grid_shape
         (xstep,ystep) = ((maxx - minx)/float(xshape),(maxy-miny)/float(yshape))
+        self.xstep = xstep; self.ystep=ystep
         self.step = (xstep,ystep)
 
     def initRectToPolygonMapping(self):
@@ -48,8 +51,8 @@ class CPSSpatio():
             for point in v:
                 (x,y) = (((point[0]-minx)/self.xstep),((point[1]-miny)/self.ystep))
                 self.grid_regions[x][y].append(k)
-    def pointToGridIndex(self):
-        (x,y) = (((point[0]-minx)/self.xstep),((point[1]-miny)/self.ystep))
+    def pointToGridIndex(self,point):
+        (x,y) = (int((point[0]-self.minx)/self.xstep),int((point[1]-self.miny)/self.ystep))
         return(x,y)
      
     def findCandidatesInGrids(self,point):
@@ -58,10 +61,13 @@ class CPSSpatio():
         return(candidates)
 
     def pnpoly(self,polygon,point):
-        n=len(polygon);i,j,c = 0,n-1,False;(testx,testy) = (float(point[0]),float(point[1]))
+        n=len(polygon);
+        i,j,c = 0,n-1,False;
+        (testx,testy) = (float(point[0]),float(point[1]))
         while(i < n):
             (currentxi,currentyi) = (float(polygon[i][0]),float(polygon[i][1]))
             (currentxj,currentyj) = (float(polygon[j][0]),float(polygon[j][1]))
+
             if ((currentyi > testy) != (currentyj > testy)) and (testx < (currentxj - currentxi) * (testy-currentyi) / (currentyj - currentyi) + currentxi):
                 c = not c
             j = i
@@ -82,6 +88,25 @@ class CPSSpatio():
             if self.pnppoly(polygon,point):
                 return(onekey)
         return(None)
+    
+    def setGeoJsonMultiplePolygon(self,geopolygonarray):
+        self.polygons = geopolygonarray
+    def findPointInPolygonJson(self,point):
+        N = len(self.polygons)
+        for ii in xrange(N):
+            polygon = self.polygons[ii]
+            if type(polygon["geometry"]["coordinates"][0][0][0]) is not list:
+                temp_array = polygon["geometry"]["coordinates"][0]
+                if self.pnpoly(temp_array,point):
+                    return(polygon)
+            else:
+                for one_array in polygon["geometry"]["coordinates"]:
+                    temp_array = one_array[0]
+                    if self.pnpoly(temp_array,point):
+                        return(polygon)
+        return(None)
+    
+    
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path
     # file_path = 'shenzhen_boundary_gps.geoJson'
@@ -117,6 +142,7 @@ class CPSCrop():
 
 class CPSDistance():
     def GPSDist(self,p1,p2):
+        #km
         R=  6373.0
         lon1 = radians(p1[0]); lat1 = radians(p1[1])
         lon2 = radians(p2[0]); lat2 = radians(p2[1])
@@ -125,7 +151,4 @@ class CPSDistance():
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = R * c
         return(distance)
-        
-
-        
     

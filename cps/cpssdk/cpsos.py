@@ -14,3 +14,6 @@ class CPSOS():
                 with open(file_path) as rfh:
                     for one_line in rfh:
                         wfh.write(one_line)
+    def googleDriveFilePath(self,google_drive,file_path,ch="\\"):
+        file_path=os.path.join(google_drive,file_path)
+        return(file_path.replace("\\",ch))
