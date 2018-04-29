@@ -9,7 +9,7 @@ class CPSSpatio():
         self.regions = {}
         self.grids = []
         self.grid_regions = {}
-        self.init()
+        # self.init()
 
     def init(self,out_edge_regions=None):
         if out_edge_regions:

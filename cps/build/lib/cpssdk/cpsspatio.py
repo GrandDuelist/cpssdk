@@ -9,7 +9,7 @@ class CPSSpatio():
         self.regions = {}
         self.grids = []
         self.grid_regions = {}
-        self.init()
+        # self.init()
 
     def init(self,out_edge_regions=None):
         if out_edge_regions:
@@ -106,6 +106,7 @@ class CPSSpatio():
                         return(polygon)
         return(None)
     
+    
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path
     # file_path = 'shenzhen_boundary_gps.geoJson'
@@ -141,6 +142,7 @@ class CPSCrop():
 
 class CPSDistance():
     def GPSDist(self,p1,p2):
+        #km
         R=  6373.0
         lon1 = radians(p1[0]); lat1 = radians(p1[1])
         lon2 = radians(p2[0]); lat2 = radians(p2[1])
