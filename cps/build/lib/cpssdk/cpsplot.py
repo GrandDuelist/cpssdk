@@ -17,6 +17,8 @@ class CPSPlot():
         return(ysnew)
     
     def styles(self):
-        pass
+        return(['bs-','rd:','go-','^-.','>--'])
+    
+    
 # cpsplot = CPSPlot()
 # print(cpsplot.smooth([3,2,5,32,3,5],3))
