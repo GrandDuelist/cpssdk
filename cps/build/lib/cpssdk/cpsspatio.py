@@ -8,7 +8,7 @@ class CPSSpatio():
             self.grid_shape = grid_shape
         self.regions = {}
         self.grids = []
-        self.grid_regions = {}
+        # self.grid_regions = [self.grid_shape[1] *[] for ii in xrange(self.grid_shape[0])]
         # self.init()
 
     def init(self,out_edge_regions=None):
@@ -26,9 +26,9 @@ class CPSSpatio():
 
     def getRectBoundaryFromRegions(self,regions):
         minx,miny,maxx,maxy = float('inf'),float('inf'),0,0
-        for k,region in regions:
-            for point in regions:
-                [x,y] = regions
+        for k,region in regions.items():
+            for point in region:
+                [x,y] = point
                 if x > maxx: maxx = x
                 if x < minx: minx = x
                 if y > maxy: maxy = y
@@ -46,11 +46,18 @@ class CPSSpatio():
     def initRectToPolygonMapping(self):
         (minx,maxx,miny,maxy) = self.minmax
         (xshape,yshape) = self.grid_shape
-        self.grid_regions = [[]*xshape for ii in xrange(yshape)]
-        for k,v in self.regions:
+        self.grid_regions = [[[]]*xshape for ii in xrange(yshape)]
+        for k,v in self.regions.items():
             for point in v:
-                (x,y) = (((point[0]-minx)/self.xstep),((point[1]-miny)/self.ystep))
-                self.grid_regions[x][y].append(k)
+                (x,y) = (int((point[0]-minx)/self.xstep),int((point[1]-miny)/self.ystep))
+                try:
+                    if x == xshape: x-=1
+                    if y == yshape: y-=1
+                    self.grid_regions[x][y].append(k)
+                except:
+                    print("x=%d" % x)
+                    print('y=%d' % y)
+
     def pointToGridIndex(self,point):
         (x,y) = (int((point[0]-self.minx)/self.xstep),int((point[1]-self.miny)/self.ystep))
         return(x,y)
@@ -78,14 +85,16 @@ class CPSSpatio():
         candidates = self.findCandidatesInGrids(point)
         regionid = self.searchPointInRegions(point,candidates)
         if regionid:
+            # print("find in candidates")
             return(regionid)
         else:
+            # print("find out candidates")
             return(self.searchPointInRegions(point,self.regions.keys()))
 
     def searchPointInRegions(self,point,candidates):
         for onekey in candidates:
             polygon = self.regions[onekey]
-            if self.pnppoly(polygon,point):
+            if self.pnpoly(polygon,point):
                 return(onekey)
         return(None)
     
