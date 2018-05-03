@@ -8,7 +8,6 @@ class CPSSpatio():
             self.grid_shape = grid_shape
         self.regions = {}
         self.grids = []
-        # self.grid_regions = [self.grid_shape[1] *[] for ii in xrange(self.grid_shape[0])]
         # self.init()
 
     def init(self,out_edge_regions=None):
@@ -42,6 +41,7 @@ class CPSSpatio():
         (xstep,ystep) = ((maxx - minx)/float(xshape),(maxy-miny)/float(yshape))
         self.xstep = xstep; self.ystep=ystep
         self.step = (xstep,ystep)
+        self.locationOfGrids()
 
     def initRectToPolygonMapping(self):
         (minx,maxx,miny,maxy) = self.minmax
@@ -60,6 +60,10 @@ class CPSSpatio():
 
     def pointToGridIndex(self,point):
         (x,y) = (int((point[0]-self.minx)/self.xstep),int((point[1]-self.miny)/self.ystep))
+        if x == self.grid_shape[0]:
+            x = self.grid_shape[0]-1
+        if y == self.grid_shape[1]:
+            y = self.grid_shape[1]-1
         return(x,y)
      
     def findCandidatesInGrids(self,point):
@@ -114,7 +118,39 @@ class CPSSpatio():
                     if self.pnpoly(temp_array,point):
                         return(polygon)
         return(None)
-    
+
+    def locationOfGrids(self):
+        (xshape,yshape)= self.grid_shape
+        (xstep,ystep) = self.step
+        grid_location = [[[0,0]]*yshape for ii in xrange(xshape)]
+        x = xstep/2.0+self.minx;  y = ystep/2.0 + self.miny
+        for ii in xrange(xshape):
+            y = ystep/2.0 + self.miny
+            for jj in xrange(yshape):
+                grid_location[ii][jj][0] = x
+                grid_location[ii][jj][1] = y
+                y = y+ystep 
+            x = x + xstep; 
+        self.grid_location = grid_location
+        return(grid_location)
+
+    def countInRegion(self,X,Y,Z=None):
+        '''
+        X: longitude or x 
+        Y: latitude or y
+        Z: None or number on locatio X and Y
+        return: the density in each grid
+        ''' 
+        if Z is None: Z = [0] * len(X)
+        grid_count = [[0] * self.grid_shape[1] for ii in xrange(self.grid_shape[0])]
+        for ii in xrange(len(X)):
+            x = X[ii]; y = Y[ii]; p = [x,y]
+            grid = self.pointToGridIndex(p)
+            grid_x,grid_y = grid
+            if grid_x < 0 or grid_x > self.grid_shape[0]: continue
+            if grid_y < 0 or grid_y > self.grid_shape[1]: continue
+            grid_count[grid_x][grid_y] += Z[ii]
+        return(grid_count)
     
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path
@@ -160,4 +196,3 @@ class CPSDistance():
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = R * c
         return(distance)
-    
