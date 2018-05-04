@@ -122,19 +122,30 @@ class CPSSpatio():
     def locationOfGrids(self):
         (xshape,yshape)= self.grid_shape
         (xstep,ystep) = self.step
-        grid_location = [[[0,0]]*yshape for ii in xrange(xshape)]
+        grid_location = [[[0,0] for jj in xrange(yshape)] for ii in xrange(xshape)]
+        x = xstep/2.0+self.minx;  y = ystep/2.0 + self.miny
+        xs = [0] * xshape
+        ys = [0] * yshape 
+        for ii in xrange(xshape):
+            xs[ii] = x
+            x += xstep
+        for ii in xrange(yshape):
+            ys[ii] = y
+            y += ystep
         x = xstep/2.0+self.minx;  y = ystep/2.0 + self.miny
         for ii in xrange(xshape):
             y = ystep/2.0 + self.miny
             for jj in xrange(yshape):
                 grid_location[ii][jj][0] = x
                 grid_location[ii][jj][1] = y
-                y = y+ystep 
-            x = x + xstep; 
+                y += ystep 
+            x += xstep; 
         self.grid_location = grid_location
-        return(grid_location)
+        self.grid_xs = xs
+        self.grid_ys = ys
+        return(grid_location,xs,ys)
 
-    def countInRegion(self,X,Y,Z=None):
+    def countInGrid(self,X,Y,Z=None):
         '''
         X: longitude or x 
         Y: latitude or y
@@ -151,6 +162,15 @@ class CPSSpatio():
             if grid_y < 0 or grid_y > self.grid_shape[1]: continue
             grid_count[grid_x][grid_y] += Z[ii]
         return(grid_count)
+
+    def cutPointByBoundary(self,locations,values,boundaryList,defaultvalue=-999):
+        for ii in xrange(len(locations)):
+            for jj in xrange(len(locations[0])):
+                p = locations[ii][jj]
+                value = values[ii][jj]
+                if not self.pnpoly(boundaryList,p):
+                    values[ii][jj] = defaultvalue
+        return(values)
     
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path

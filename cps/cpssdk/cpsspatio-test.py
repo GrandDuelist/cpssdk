@@ -1,5 +1,4 @@
 from cpsspatio import *
-import simplejson
 #p1 = (21.0122287,52.2296756)
 #p2 = (16.9251681,52.406374)
 #cpsdistance = CPSDistance()
@@ -18,8 +17,8 @@ def testGeoJsonMultiplePolygon():
 def testGridCount():
     cpsspatio = CPSSpatio()
     cpsspatio.initSpatioRectBoundary(113.7463515,114.6237079,22.4415225,22.8644043)
-    result = cpsspatio.countInRegion([114.23,113.94,114.312,114.11],[22.55,22.65,22.71,22.48],[1,3,4,5])
+    result = cpsspatio.countInGrid([114.23,113.94,114.312,114.11],[22.55,22.65,22.71,22.48],[1,3,4,5])
     print(cpsspatio.grid_location)
-    print(result)
+    #print(result)
 
 testGridCount()
