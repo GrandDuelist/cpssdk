@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan2, radians
 import json
+import collections
 
 class CPSSpatio():
     def __init__(self,grid_shape=None):
@@ -164,13 +165,30 @@ class CPSSpatio():
         return(grid_count)
 
     def cutPointByBoundary(self,locations,values,boundaryList,defaultvalue=-999):
-        for ii in xrange(len(locations)):
+        for ii in xrange(len(locations)): 
             for jj in xrange(len(locations[0])):
                 p = locations[ii][jj]
                 value = values[ii][jj]
                 if not self.pnpoly(boundaryList,p):
                     values[ii][jj] = defaultvalue
         return(values)
+
+    def simpleJsonToGeoPandas(self,out_edge):
+        import geopandas
+        from shapely.geometry import Polygon, Point
+        l = len(out_edge[0].keys()) 
+        result = collections.defaultdict(list) 
+        keys  = out_edge[0].keys()
+        for one in out_edge:
+            for ii in xrange(l):
+                one_key = keys[ii]
+                if one_key == 'geo_array':
+                    p = Polygon(one[one_key])
+                    result[one_key].append(p)
+                    continue
+                result[one_key].append(one.get(one_key,None))
+        data = geopandas.GeoDataFrame(data=result)
+        return(data)
     
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path
