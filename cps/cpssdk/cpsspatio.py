@@ -25,7 +25,7 @@ class CPSSpatio():
             self.regions[geo_id] = geo_array
 
     def getRectBoundaryFromRegions(self,regions):
-        minx,miny,maxx,maxy = float('inf'),float('inf'),0,0
+        minx,miny,maxx,maxy = float('inf'),float('inf'),-float('inf'),-float('inf')
         for k,region in regions.items():
             for point in region:
                 [x,y] = point
@@ -47,7 +47,7 @@ class CPSSpatio():
     def initRectToPolygonMapping(self):
         (minx,maxx,miny,maxy) = self.minmax
         (xshape,yshape) = self.grid_shape
-        self.grid_regions = [[[]]*xshape for ii in xrange(yshape)]
+        self.grid_regions = [[[]]*yshape for ii in xrange(xshape)]
         for k,v in self.regions.items():
             for point in v:
                 (x,y) = (int((point[0]-minx)/self.xstep),int((point[1]-miny)/self.ystep))
@@ -70,6 +70,13 @@ class CPSSpatio():
     def findCandidatesInGrids(self,point):
         (x,y) = self.pointToGridIndex(point)
         candidates = self.grid_regions[x][y]
+        lx = len(self.grid_regions)
+        ly = len(self.grid_regions[0])
+        for ii in xrange(x-1,x+2):
+            for jj in xrange(y-1,y+2):
+                if ii < 0 or jj < 0 or ii > lx-1 or jj > ly-1 or (ii==x and jj==y):
+                    continue
+                candidates.extend(self.grid_regions[ii][jj])
         return(candidates)
 
     def pnpoly(self,polygon,point):

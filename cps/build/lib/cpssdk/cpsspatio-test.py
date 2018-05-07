@@ -20,5 +20,13 @@ def testGridCount():
     result = cpsspatio.countInGrid([114.23,113.94,114.312,114.11],[22.55,22.65,22.71,22.48],[1,3,4,5])
     print(cpsspatio.grid_location)
     #print(result)
+def testSimpleJsonToGeoPandas():
+    out_edge=json.load(open(r"E:\drive\W-WorkingOn\1-coding\1-research-projects\7-NYC\spark.sql\json\new-york-block-region.simpleJson"))['out_edge']
+    cpsspatio = CPSSpatio()
+    test = cpsspatio.simpleJsonToGeoPandas(out_edge)
+    print(test)
 
-testGridCount()
+
+testSimpleJsonToGeoPandas()
+
+

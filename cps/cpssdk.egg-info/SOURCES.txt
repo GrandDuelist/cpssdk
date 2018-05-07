@@ -1,6 +1,7 @@
 setup.py
 cpssdk/__init__.py
 cpssdk/cpsfeatures.py
+cpssdk/cpsfilter.py
 cpssdk/cpsos.py
 cpssdk/cpsplot.py
 cpssdk/cpsspatio-test.py

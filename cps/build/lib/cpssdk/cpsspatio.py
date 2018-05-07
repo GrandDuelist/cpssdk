@@ -1,5 +1,6 @@
 from math import sin, cos, sqrt, atan2, radians
 import json
+import collections
 
 class CPSSpatio():
     def __init__(self,grid_shape=None):
@@ -24,7 +25,7 @@ class CPSSpatio():
             self.regions[geo_id] = geo_array
 
     def getRectBoundaryFromRegions(self,regions):
-        minx,miny,maxx,maxy = float('inf'),float('inf'),0,0
+        minx,miny,maxx,maxy = float('inf'),float('inf'),-float('inf'),-float('inf')
         for k,region in regions.items():
             for point in region:
                 [x,y] = point
@@ -46,7 +47,7 @@ class CPSSpatio():
     def initRectToPolygonMapping(self):
         (minx,maxx,miny,maxy) = self.minmax
         (xshape,yshape) = self.grid_shape
-        self.grid_regions = [[[]]*xshape for ii in xrange(yshape)]
+        self.grid_regions = [[[]]*yshape for ii in xrange(xshape)]
         for k,v in self.regions.items():
             for point in v:
                 (x,y) = (int((point[0]-minx)/self.xstep),int((point[1]-miny)/self.ystep))
@@ -69,6 +70,13 @@ class CPSSpatio():
     def findCandidatesInGrids(self,point):
         (x,y) = self.pointToGridIndex(point)
         candidates = self.grid_regions[x][y]
+        lx = len(self.grid_regions)
+        ly = len(self.grid_regions[0])
+        for ii in xrange(x-1,x+2):
+            for jj in xrange(y-1,y+2):
+                if ii < 0 or jj < 0 or ii > lx-1 or jj > ly-1 or (ii==x and jj==y):
+                    continue
+                candidates.extend(self.grid_regions[ii][jj])
         return(candidates)
 
     def pnpoly(self,polygon,point):
@@ -164,13 +172,30 @@ class CPSSpatio():
         return(grid_count)
 
     def cutPointByBoundary(self,locations,values,boundaryList,defaultvalue=-999):
-        for ii in xrange(len(locations)):
+        for ii in xrange(len(locations)): 
             for jj in xrange(len(locations[0])):
                 p = locations[ii][jj]
                 value = values[ii][jj]
                 if not self.pnpoly(boundaryList,p):
                     values[ii][jj] = defaultvalue
         return(values)
+
+    def simpleJsonToGeoPandas(self,out_edge):
+        import geopandas
+        from shapely.geometry import Polygon, Point
+        l = len(out_edge[0].keys()) 
+        result = collections.defaultdict(list) 
+        keys  = out_edge[0].keys()
+        for one in out_edge:
+            for ii in xrange(l):
+                one_key = keys[ii]
+                if one_key == 'geo_array':
+                    p = Polygon(one[one_key])
+                    result[one_key].append(p)
+                    continue
+                result[one_key].append(one.get(one_key,None))
+        data = geopandas.GeoDataFrame(data=result)
+        return(data)
     
 def minmaxGeoJson(geojson_path):
     file_path = geojson_path
