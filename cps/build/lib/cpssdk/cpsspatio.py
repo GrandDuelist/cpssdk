@@ -67,7 +67,7 @@ class CPSSpatio():
             y = self.grid_shape[1]-1
         return(x,y)
      
-    def findCandidatesInGrids(self,point,window):
+    def findCandidatesInGrids(self,point,window,previous):
         (x,y) = self.pointToGridIndex(point)
         candidates = self.grid_regions[x][y]
         lx = len(self.grid_regions)
@@ -77,7 +77,14 @@ class CPSSpatio():
                 if ii < 0 or jj < 0 or ii > lx-1 or jj > ly-1 or (ii==x and jj==y):
                     continue
                 candidates.extend(self.grid_regions[ii][jj])
-        return(candidates)
+                candidates = list(set(candidates))
+        mm = {}; new_cand = []
+        for one in previous: 
+            mm[one] = True
+        for one in candidates:
+            if not mm.get(one,False):
+                new_cand.append(one)
+        return(new_cand,candidates)
 
     def pnpoly(self,polygon,point):
         n=len(polygon);
@@ -93,14 +100,16 @@ class CPSSpatio():
             i += 1
         return(c)
 
-    def findPointRegionID(self,point,window=1):
-        candidates = self.findCandidatesInGrids(point,window)
+    def findPointRegionID(self,point,window=0,previous=[]):
+        (candidates,previous) = self.findCandidatesInGrids(point,window,previous)
         regionid = self.searchPointInRegions(point,candidates)
         if regionid:
             # print("find in candidates")
             return(regionid)
         else:
-            return(self.findPointRegionID(point,window+1))
+            if window > 5:
+                return(None)
+            return(self.findPointRegionID(point,window+1,previous))
             # print("find out candidates")
             # return(self.searchPointInRegions(point,self.regions.keys()))
 
