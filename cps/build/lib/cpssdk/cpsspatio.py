@@ -67,13 +67,13 @@ class CPSSpatio():
             y = self.grid_shape[1]-1
         return(x,y)
      
-    def findCandidatesInGrids(self,point):
+    def findCandidatesInGrids(self,point,window):
         (x,y) = self.pointToGridIndex(point)
         candidates = self.grid_regions[x][y]
         lx = len(self.grid_regions)
         ly = len(self.grid_regions[0])
-        for ii in xrange(x-1,x+2):
-            for jj in xrange(y-1,y+2):
+        for ii in xrange(x-window,x+window+1):
+            for jj in xrange(y-window,y+window+1):
                 if ii < 0 or jj < 0 or ii > lx-1 or jj > ly-1 or (ii==x and jj==y):
                     continue
                 candidates.extend(self.grid_regions[ii][jj])
@@ -93,15 +93,16 @@ class CPSSpatio():
             i += 1
         return(c)
 
-    def findPointRegionID(self,point):
-        candidates = self.findCandidatesInGrids(point)
+    def findPointRegionID(self,point,window=1):
+        candidates = self.findCandidatesInGrids(point,window)
         regionid = self.searchPointInRegions(point,candidates)
         if regionid:
             # print("find in candidates")
             return(regionid)
         else:
+            return(self.findPointRegionID(point,window+1))
             # print("find out candidates")
-            return(self.searchPointInRegions(point,self.regions.keys()))
+            # return(self.searchPointInRegions(point,self.regions.keys()))
 
     def searchPointInRegions(self,point,candidates):
         for onekey in candidates:
