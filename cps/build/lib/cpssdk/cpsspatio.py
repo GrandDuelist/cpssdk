@@ -69,7 +69,7 @@ class CPSSpatio():
      
     def findCandidatesInGrids(self,point,window,previous):
         (x,y) = self.pointToGridIndex(point)
-        candidates = self.grid_regions[x][y]
+        candidates = list(self.grid_regions[x][y])
         lx = len(self.grid_regions)
         ly = len(self.grid_regions[0])
         for ii in xrange(x-window,x+window+1):
@@ -207,16 +207,16 @@ class CPSSpatio():
         data = geopandas.GeoDataFrame(data=result)
         return(data)
     
-def minmaxGeoJson(geojson_path):
-    file_path = geojson_path
-    # file_path = 'shenzhen_boundary_gps.geoJson'
-    data = json.load(open(file_path))
-    coordinates = data['coordinates'][0]
-    minx=miny=100000; maxx=maxy = 0;
-    for point in coordinates:
-        (x,y) = point
-        minx = min(minx,x);maxx = max(maxx,x);miny=min(miny,y);maxy=max(maxy,y)
-    print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))        
+    def minmaxGeoJson(self,geojson_path):
+        file_path = geojson_path
+        # file_path = 'shenzhen_boundary_gps.geoJson'
+        data = json.load(open(file_path))
+        coordinates = data['coordinates'][0]
+        minx=miny=100000; maxx=maxy = -10000;
+        for point in coordinates:
+            (x,y) = point
+            minx = min(minx,x);maxx = max(maxx,x);miny=min(miny,y);maxy=max(maxy,y)
+        print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))        
 
 class CPSCrop():
     def __init__(self):
