@@ -69,7 +69,8 @@ class CPSSpatio():
      
     def findCandidatesInGrids(self,point,window,previous):
         (x,y) = self.pointToGridIndex(point)
-        candidates = list(self.grid_regions[x][y])
+        candidates = []
+        candidates.extend(self.grid_regions[x][y])
         lx = len(self.grid_regions)
         ly = len(self.grid_regions[0])
         for ii in xrange(x-window,x+window+1):
