@@ -218,7 +218,42 @@ class CPSSpatio():
         for point in coordinates:
             (x,y) = point
             minx = min(minx,x);maxx = max(maxx,x);miny=min(miny,y);maxy=max(maxy,y)
-        print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))        
+        print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))     
+
+    def gpsPolygonArea(self,polygon):
+        '''
+        polygon: array contains vertex of the polygon
+        return: area in km^2
+        '''
+        import pyproj    
+        import shapely
+        import shapely.ops as ops
+        from shapely.geometry.polygon import Polygon
+        from functools import partial
+        
+        geom = Polygon(polygon)
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat1=geom.bounds[1],
+                    lat2=geom.bounds[3])),
+            geom)
+        return(geom_area.area/1000000)
+
+    def simpleJsonToIdJson(self,out_edge,key='geo_id',value='geo_array'):
+        '''
+        out_edge: array of geoid and geo array for polygon 
+        return: idJson mapping id to geoarray
+        '''
+        mm ={}
+        for oneRegion in out_edge:
+            geoID = oneRegion['geo_id']
+            geoArray = oneRegion['geo_array']
+            mm[geoID] = geoArray
+        return(mm)     
 
 class CPSCrop():
     def __init__(self):
