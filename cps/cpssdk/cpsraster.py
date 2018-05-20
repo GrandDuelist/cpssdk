@@ -1,6 +1,7 @@
 import os 
 import json
 import shutil
+import logging
 
 class CPSPop():
     """
@@ -93,8 +94,9 @@ class CPSPop():
             if not os.path.exists(tifffile):
                 oneRegion['pop']=0
                 continue
-            print(tifffile)
-            band = gdal.Open(tifffile).GetRasterBand(1)
+            logging.info("count pop in geoid = %s" % str(geoid))
+            srcDs = gdal.Open(tifffile)
+            band = srcDs.GetRasterBand(1)
             values = band.ReadAsArray()
             sumValue = 0
             for valueArray in values:
