@@ -4,6 +4,7 @@ cpssdk/cpsfeatures.py
 cpssdk/cpsfilter.py
 cpssdk/cpsos.py
 cpssdk/cpsplot.py
+cpssdk/cpsraster.py
 cpssdk/cpsspatio-test.py
 cpssdk/cpsspatio.py
 cpssdk/cpstime.py

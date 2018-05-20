@@ -3,4 +3,5 @@ from .cpstime import CPSTime
 from .cpsos import CPSOS
 from .cpsfeatures import CPSFeatures
 from .cpsplot import CPSPlot
+from .cpsraster import CPSPop 
 

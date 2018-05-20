@@ -166,12 +166,12 @@ class CPSSpatio():
         return(grid_location,xs,ys)
 
     def countInGrid(self,X,Y,Z=None):
-        '''
+        """ 
         X: longitude or x 
         Y: latitude or y
         Z: None or number on locatio X and Y
         return: the density in each grid
-        ''' 
+        """ 
         if Z is None: Z = [0] * len(X)
         grid_count = [[0] * self.grid_shape[1] for ii in xrange(self.grid_shape[0])]
         for ii in xrange(len(X)):
