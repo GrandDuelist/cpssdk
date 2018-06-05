@@ -1,4 +1,5 @@
 from cpsspatio import *
+import pandas as pd
 #p1 = (21.0122287,52.2296756)
 #p2 = (16.9251681,52.406374)
 #cpsdistance = CPSDistance()
@@ -10,7 +11,7 @@ def testCPSCrop():
 
 def testGeoJsonMultiplePolygon():
     cpsspatio = CPSSpatio()
-    aa = simplejson.load(open('C:\Users\zhiha\Downloads\china.json'))
+    aa = simplejson.load(open(r'C:\Users\zhiha\Downloads\china.json'))
     cpsspatio.setGeoJsonMultiplePolygon(aa)
     cpsspatio.findPointInPolygonJson((118.4187,28.2968))
 
@@ -26,7 +27,15 @@ def testSimpleJsonToGeoPandas():
     test = cpsspatio.simpleJsonToGeoPandas(out_edge)
     print(test)
 
-
-testSimpleJsonToGeoPandas()
+def testGenerateGuangdong():
+    centersPath = r"E:\drive\W-WorkingOn\1-coding\2-visual\1-processing\6-plot-ETC-density\process-data\data\station_volume.csv"
+    boundaryPath  = r"E:\drive\W-WorkingOn\1-coding\2-visual\1-processing\6-plot-ETC-density\process-data\data\guangdong-boundary.json"
+    cpsspatio = CPSSpatio()
+    data = pd.read_csv(centersPath,header=None)
+    centers = list(data.apply(lambda x: [x[0],x[1]], axis=1))
+    boundary = json.load(open(boundaryPath))['coordinates'][0]
+    simpleJson  = cpsspatio.generateVoronoiInBoundary(centers=centers,boundary=boundary)
+    print(simpleJson)
+testGenerateGuangdong()
 
 

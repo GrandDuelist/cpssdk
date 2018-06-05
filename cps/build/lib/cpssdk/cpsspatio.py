@@ -1,6 +1,8 @@
 from math import sin, cos, sqrt, atan2, radians
 import json
 import collections
+from cpsspatio_interval import *
+
 
 class CPSSpatio():
     def __init__(self,grid_shape=None):
@@ -9,6 +11,7 @@ class CPSSpatio():
             self.grid_shape = grid_shape
         self.regions = {}
         self.grids = []
+        self.spatioInterval = CPSSpatioInterval()
         # self.init()
 
     def init(self,out_edge_regions=None):
@@ -253,7 +256,76 @@ class CPSSpatio():
             geoID = oneRegion['geo_id']
             geoArray = oneRegion['geo_array']
             mm[geoID] = geoArray
-        return(mm)     
+        return(mm)
+
+
+    def geoArrayFromPolygonString(self,polygonString):
+        pointString = polygonString.replace("POLYGON ((","").replace("))","")
+        points = pointString.split(",")
+        geo_array = [];
+        for one in points:
+            attrs = one.strip(" ").split(" ")
+            lon = float(attrs[0]); lat = float(attrs[1])
+            geo_array.append([lon,lat])
+        return(geo_array)
+
+    def generateVoronoiInBoundary(self,centers,boundary):
+        '''
+        Generate voronoi polygons based on centers and boundary of the city
+        :param centers: list of locations of voronoi centers
+        :param boundary: boundary of the voronoi partition
+        :return: a simple json file with voronoi polygons
+        '''
+        from scipy.spatial import Voronoi
+        from shapely.geometry import Polygon
+        import numpy as np
+        points = np.array(centers); vor = Voronoi(centers);  mask = Polygon(boundary); id=0
+        regions,vertices = self.spatioInterval.voronoi_finite_polygons_2d(vor); allRegions = []
+        for ii in range(0,len(regions)):
+            region = regions[ii]
+            polygon = vertices[region]
+            shape = list(polygon.shape)
+            shape[0] += 1
+            p = Polygon(np.append(polygon, polygon[0]).reshape(*shape)).intersection(mask)
+            try:
+                poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
+                allRegions.append({"geo_array": poly.tolist()+[poly.tolist()[0]], "geo_center":centers[ii], "geo_id":id})
+                id += 1
+            except:
+                pp = p
+                for p in pp:
+                    poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
+                    allRegions.append({"geo_array": poly.tolist()+[poly.tolist()[0]],"geo_center":centers[ii], "geo_id":id})
+                    id += 1
+        return({"out_edge": allRegions})
+
+    # def generateVoronoiInBoundary(self,simpleJson,centerKeys,boundary):
+    #     '''
+    #     Generate voronoi polygons based on centers and boundary of the city
+    #     :param centers: list of locations of voronoi centers
+    #     :param boundary: boundary of the voronoi partition
+    #     :return: a simple json file with voronoi polygons
+    #     '''
+    #     from scipy.spatial import Voronoi
+    #     from shapely.geometry import Polygon
+    #     import numpy as np
+    #     points = np.array(centers); vor = Voronoi(centers);  mask = Polygon(boundary)
+    #     regions,vertices = self.spatioInterval.voronoi_finite_polygons_2d(); allRegions = []
+    #     for ii in range(0,len(regions)):
+    #         region = regions[ii]
+    #         polygon = vertices[region]
+    #         shape = list(polygon.shape)
+    #         shape[0] += 1
+    #         p = Polygon(np.append(polygon, polygon[0]).reshape(*shape)).intersection(mask)
+    #         try:
+    #             poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
+    #             allRegions.append({"geo_array": [poly.tolist()+[poly.tolist()[0]]], "geo_center":centers[ii]})
+    #         except:
+    #             pp = p
+    #             for p in pp:
+    #                 poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
+    #                 allRegions.append({"geo_array": [poly.tolist()+[poly.tolist()[0]]],"geo_center":centers[ii]})
+    #     return all_regions
 
 class CPSCrop():
     def __init__(self):
@@ -266,8 +338,8 @@ class CPSCrop():
         return(isx and isy)
     def setShenzhenRectangle(self):
         self.setRectangle(113.7463515,114.6237079,22.4415225,22.8644043)
-    def setPolygonBoundary(self,polygon_list):
-        self.polygon_boundary = polygon_list
+    def setPolygonBoundary(self,geo_array):
+        self.polygon_boundary = geo_array
         
     def setShenzhenPolygonBoundary(self):
         data = json.load(open("data/boundary/shenzhen_boundary_gps.geoJson"))
@@ -276,6 +348,7 @@ class CPSCrop():
     
     def isInPolygon(self,x,y):
         return(self.cpsspatio.pnpoly(self.polygon_boundary,[x,y]))
+
 
 class CPSDistance():
     def GPSDist(self,p1,p2):

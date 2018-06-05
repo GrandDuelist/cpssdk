@@ -3,10 +3,14 @@ cpssdk/__init__.py
 cpssdk/cpsfeatures.py
 cpssdk/cpsfilter.py
 cpssdk/cpsos.py
+cpssdk/cpspandas-test.py
+cpssdk/cpspandas.py
+cpssdk/cpsplot-test.py
 cpssdk/cpsplot.py
 cpssdk/cpsraster.py
 cpssdk/cpsspatio-test.py
 cpssdk/cpsspatio.py
+cpssdk/cpsspatio_interval.py
 cpssdk/cpstime.py
 cpssdk.egg-info/PKG-INFO
 cpssdk.egg-info/SOURCES.txt

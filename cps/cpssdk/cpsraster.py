@@ -26,10 +26,13 @@ class CPSPop():
     def popInMultiPolygonFromSimpleJson(self,rasterFilePath,geoJsonFilePath):
         """
         func:
+            map population to polygon
         param:
             rasterFilePath: file path information is extracted from  
             geoJsonFilePath:  file path to simple json with multiple polygon
-            return: simpleJson with pop attributes 
+            return: simpleJson with pop attributes
+        return:
+            population in polygon
         """
         self.tiffInMultiPolygonFromSimpleJson(rasterFilePath,geoJsonFilePath)
         self.tiffToPopSimpleJson(geoJsonFilePath)
