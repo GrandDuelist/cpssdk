@@ -12,9 +12,13 @@ class CPSSpatio():
         self.regions = {}
         self.grids = []
         self.spatioInterval = CPSSpatioInterval()
-        # self.init()
 
     def init(self,out_edge_regions=None):
+        '''
+        initialize CPSSpatio with a polygon regions
+        :param out_edge_regions: out_edge attribute in simple json format
+        :return: None
+        '''
         if out_edge_regions:
             self.initSpatioRegion(out_edge_regions)
             (minx,miny,maxx,maxy) = self.getRectBoundaryFromRegions(self.regions)
@@ -23,11 +27,21 @@ class CPSSpatio():
 
     
     def initSpatioRegion(self,out_edge):
+        '''
+        set polygon and geo id by in array
+        :param out_edge: the out edge arribute in simple json
+        :return: None
+        '''
         for one_region in out_edge:
             geo_id = one_region['geo_id']; geo_array = one_region['geo_array']
             self.regions[geo_id] = geo_array
 
     def getRectBoundaryFromRegions(self,regions):
+        '''
+        find minimum and maximum value on x and y axis in region list
+        :param regions:
+        :return:
+        '''
         minx,miny,maxx,maxy = float('inf'),float('inf'),-float('inf'),-float('inf')
         for k,region in regions.items():
             for point in region:
@@ -39,6 +53,15 @@ class CPSSpatio():
         return(minx,miny,maxx,maxy)
         
     def initSpatioRectBoundary(self,minx,maxx,miny,maxy):
+        '''
+        set a rectangle area, which is always the minimum rectangle containing the polygon region partition
+        set grid partition based on the rectangle area
+        :param minx: minimum value on x/longitude axis
+        :param maxx: maximum value on x/longitude axis
+        :param miny: minimum value on y/latitude axis
+        :param maxy: maximum value on y/latitude axis
+        :return: None
+        '''
         self.minmax = (minx,maxx,miny,maxy)
         self.minx = minx; self.maxx=maxx; self.miny=miny; self.maxy = maxy
         (xshape,yshape) = self.grid_shape
@@ -127,6 +150,8 @@ class CPSSpatio():
     
     def setGeoJsonMultiplePolygon(self,geopolygonarray):
         self.polygons = geopolygonarray
+
+
     def findPointInPolygonJson(self,point):
         N = len(self.polygons)
         for ii in xrange(N):
@@ -169,12 +194,13 @@ class CPSSpatio():
         return(grid_location,xs,ys)
 
     def countInGrid(self,X,Y,Z=None):
-        """ 
-        X: longitude or x 
-        Y: latitude or y
-        Z: None or number on locatio X and Y
-        return: the density in each grid
-        """ 
+        '''
+        count density in grids
+        :param X: longitude or x, float or int
+        :param Y: latitude or y, float or int
+        :param Z: None or count at GPS location X and Y
+        :return: the density in each grid, list, a[grid_x][grid_y] = density
+        '''
         if Z is None: Z = [0] * len(X)
         grid_count = [[0] * self.grid_shape[1] for ii in xrange(self.grid_shape[0])]
         for ii in xrange(len(X)):
@@ -187,6 +213,14 @@ class CPSSpatio():
         return(grid_count)
 
     def cutPointByBoundary(self,locations,values,boundaryList,defaultvalue=-999):
+        '''
+        set the point outside a polygon as a specific value
+        :param locations: a two dimension array, index of the array is the grid index, one element of the array is a GPS location
+        :param values: a two dimension array, store a value in the location, e.g., number of passenger in a station
+        :param boundaryList: a list, polygon coordinate list
+        :param defaultvalue: the value to be set outside the polygon, default is -999
+        :return: values after the change
+        '''
         for ii in xrange(len(locations)): 
             for jj in xrange(len(locations[0])):
                 p = locations[ii][jj]
@@ -196,10 +230,15 @@ class CPSSpatio():
         return(values)
 
     def simpleJsonToGeoPandas(self,out_edge):
+        '''
+        covert a simple json file to GeoPandas
+        :param out_edge: the out_edge attribute in the simple json
+        :return: the geopandas data frame object
+        '''
         import geopandas
         from shapely.geometry import Polygon, Point
-        l = len(out_edge[0].keys()) 
-        result = collections.defaultdict(list) 
+        l = len(out_edge[0].keys())
+        result = collections.defaultdict(list)
         keys  = out_edge[0].keys()
         for one in out_edge:
             for ii in xrange(l):
@@ -211,8 +250,13 @@ class CPSSpatio():
                 result[one_key].append(one.get(one_key,None))
         data = geopandas.GeoDataFrame(data=result)
         return(data)
-    
+
     def minmaxGeoJson(self,geojson_path):
+        '''
+        find the minimum and maximum values on x and y axis in a geo json object
+        :param geojson_path: file path of the geo json file
+        :return: an array with min and max value on both x and y axis
+        '''
         file_path = geojson_path
         # file_path = 'shenzhen_boundary_gps.geoJson'
         data = json.load(open(file_path))
@@ -221,19 +265,20 @@ class CPSSpatio():
         for point in coordinates:
             (x,y) = point
             minx = min(minx,x);maxx = max(maxx,x);miny=min(miny,y);maxy=max(maxy,y)
-        print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))     
+        print("minx = "+str(minx)+" maxx = " + str(maxx) + " miny = " + str(miny) + " maxy = "+str(maxy))
+        return([minx,maxx,miny,maxy])
 
     def gpsPolygonArea(self,polygon):
         '''
         polygon: array contains vertex of the polygon
         return: area in km^2
         '''
-        import pyproj    
+        import pyproj
         import shapely
         import shapely.ops as ops
         from shapely.geometry.polygon import Polygon
         from functools import partial
-        
+
         geom = Polygon(polygon)
         geom_area = ops.transform(
             partial(
@@ -248,8 +293,11 @@ class CPSSpatio():
 
     def simpleJsonToIdJson(self,out_edge,key='geo_id',value='geo_array'):
         '''
-        out_edge: array of geoid and geo array for polygon 
-        return: idJson mapping id to geoarray
+        create a mapping json from geo id to an attribute
+        :param out_edge: array of geoid and geo array for polygon
+        :param key: the key of the mapping, default is geo_id in simple json
+        :param value: the value of the mapping, default is geo_array in simple json
+        :return:  a json file mapping id to geoarray
         '''
         mm ={}
         for oneRegion in out_edge:
@@ -260,6 +308,11 @@ class CPSSpatio():
 
 
     def geoArrayFromPolygonString(self,polygonString):
+        '''
+        create a geoArray from polygon string, which is a printout of polygon in Shapely package
+        :param polygonString: print out of shapely polygon, e.g., POLYGON (( 114.23 22.14, 114.32 22.15, 114.35, 22.12))
+        :return: a Shapely Polygon object
+        '''
         pointString = polygonString.replace("POLYGON ((","").replace("))","")
         points = pointString.split(",")
         geo_array = [];
@@ -299,46 +352,42 @@ class CPSSpatio():
                     id += 1
         return({"out_edge": allRegions})
 
-    # def generateVoronoiInBoundary(self,simpleJson,centerKeys,boundary):
-    #     '''
-    #     Generate voronoi polygons based on centers and boundary of the city
-    #     :param centers: list of locations of voronoi centers
-    #     :param boundary: boundary of the voronoi partition
-    #     :return: a simple json file with voronoi polygons
-    #     '''
-    #     from scipy.spatial import Voronoi
-    #     from shapely.geometry import Polygon
-    #     import numpy as np
-    #     points = np.array(centers); vor = Voronoi(centers);  mask = Polygon(boundary)
-    #     regions,vertices = self.spatioInterval.voronoi_finite_polygons_2d(); allRegions = []
-    #     for ii in range(0,len(regions)):
-    #         region = regions[ii]
-    #         polygon = vertices[region]
-    #         shape = list(polygon.shape)
-    #         shape[0] += 1
-    #         p = Polygon(np.append(polygon, polygon[0]).reshape(*shape)).intersection(mask)
-    #         try:
-    #             poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
-    #             allRegions.append({"geo_array": [poly.tolist()+[poly.tolist()[0]]], "geo_center":centers[ii]})
-    #         except:
-    #             pp = p
-    #             for p in pp:
-    #                 poly = np.array(list(zip(p.boundary.coords.xy[0][:-1], p.boundary.coords.xy[1][:-1])))
-    #                 allRegions.append({"geo_array": [poly.tolist()+[poly.tolist()[0]]],"geo_center":centers[ii]})
-    #     return all_regions
 
 class CPSCrop():
     def __init__(self):
         self.cpsspatio = CPSSpatio()
+        self.cpsdist = CPSDistance()
     def setRectangle(self,minx,maxx,miny,maxy):
+        '''
+        set a rectangle area with coordincates for crop
+        :param minx: minimum value on x/longitude axis of the rectrangle
+        :param maxx: maximun value on x/longitude axis of the rectrangle
+        :param miny: minimum value on y/latitude axis of the rectrangle
+        :param maxy: maximum value on y/latitude axis of the rectrangle
+        :return: None
+        '''
         self.minx = minx; self.miny = miny; self.maxx = maxx; self.maxy = maxy
+
     def isInRectangle(self,x,y):
+        '''
+        return if a point (x,y) is in the predefined rectangle area
+        :param x:  x/longitude value
+        :param y:  y/latitude value
+        :return: true if the point is in the area and false if not
+        '''
         isx = (x >= self.minx and x <= self.maxx)
         isy = (y >= self.miny and y <= self.maxy)
         return(isx and isy)
+
     def setShenzhenRectangle(self):
         self.setRectangle(113.7463515,114.6237079,22.4415225,22.8644043)
+
     def setPolygonBoundary(self,polygon_list):
+        '''
+        set a polygon area with coordincates for crop
+        :param polygon_list: a coordinate array to define the polygon, example [[122.3,21.2],[122.4,21.3],[122.5,21.4]]
+        :return: None
+        '''
         self.polygon_boundary = polygon_list
         
     def setShenzhenPolygonBoundary(self):
@@ -347,12 +396,43 @@ class CPSCrop():
         self.setPolygonBoundary(polygon_list)
     
     def isInPolygon(self,x,y):
+        '''
+        return if a point (x,y) is in the predefined polygon area
+        :param x:  x/longitude value
+        :param y:  y/latitude value
+        :return: true if the point is in the area and false if not
+        '''
         return(self.cpsspatio.pnpoly(self.polygon_boundary,[x,y]))
 
+    def setCircleBoundary(self,center,radius):
+        '''
+        set a circle area with coordincates for crop
+        :param center: center of the circle, e.g., gps center, [114.43,22.01]
+        :param radius: radious of the circle, in km
+        :return: None
+        '''
+        self.circleCenter = center
+        self.circleRadius = radius
+
+    def isInCircle(self,x,y):
+        '''
+        return if a point (x,y) is in the predefined polygon area
+        :param x: x/longitude value
+        :param y: y/latitude value
+        :return:  true if the point is in the area and false if not
+        '''
+        testP = [x,y]
+        dist = self.cpsdist.GPSDist(self.circleCenter,testP)
+        return(dist<=self.circleRadius)
 
 class CPSDistance():
     def GPSDist(self,p1,p2):
-        #km
+        '''
+        calculate the distance between two GPS points
+        :param p1: gps point
+        :param p2: gps point
+        :return: distance in km
+        '''
         R=  6373.0
         lon1 = radians(p1[0]); lat1 = radians(p1[1])
         lon2 = radians(p2[0]); lat2 = radians(p2[1])
@@ -361,3 +441,26 @@ class CPSDistance():
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
         distance = R * c
         return(distance)
+
+    def GPSPolygonArea(self,polygon):
+        '''
+        a shapely polygon object or a list containing coordincates of a polygon
+        :param polygon: array contains vertex of the polygon
+        :return: area in km^2
+        '''
+        import pyproj
+        import shapely
+        import shapely.ops as ops
+        from shapely.geometry.polygon import Polygon
+        from functools import partial
+        geom = Polygon(polygon)
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat1=geom.bounds[1],
+                    lat2=geom.bounds[3])),
+            geom)
+        return(geom_area.area/1000000)

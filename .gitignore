@@ -1,0 +1,7 @@
+.idea
+.idea/*
+cps/.idea
+cps/.idea/*
+cps/cpssdk/.idea
+cps/cpssdk/.idea/*
+*.pyc
