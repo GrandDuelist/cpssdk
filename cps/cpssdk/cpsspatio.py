@@ -3,7 +3,7 @@ import json
 import collections
 from cpsspatio_interval import *
 
-
+xrange = range
 class CPSSpatio():
     def __init__(self,grid_shape=None):
         self.grid_shape = (50,50)
